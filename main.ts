@@ -4,8 +4,8 @@
 // through the YouTube Data API. Nothing this program writes about the
 // video is scored.
 //
-// VIDEO.json holds a placeholder address until the clip is uploaded;
-// replace it with the video's address before you submit.
+// VIDEO.json holds the address of the uploaded public YouTube Short;
+// the house reads the video itself through the YouTube Data API.
 //
 // Outside the grader's container, MAKEFUN_BOT_DIR and MAKEFUN_OUTPUT_DIR
 // stand in for /bot and /output:
@@ -24,6 +24,15 @@ const raw = readFileSync(src, 'utf8');
 const parsed: unknown = JSON.parse(raw);
 if (typeof parsed !== 'object' || parsed === null || typeof (parsed as { url?: unknown }).url !== 'string') {
   console.error('VIDEO.json must be a JSON object with a string url');
+  process.exit(1);
+}
+const url = (parsed as { url: string }).url;
+const isYouTubeVideo =
+  /^https:\/\/www\.youtube\.com\/shorts\/[A-Za-z0-9_-]{11}$/.test(url) ||
+  /^https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}(&.*)?$/.test(url) ||
+  /^https:\/\/youtu\.be\/[A-Za-z0-9_-]{11}(\?.*)?$/.test(url);
+if (!isYouTubeVideo) {
+  console.error('VIDEO.json url must be a real YouTube video address (shorts, watch?v=, or youtu.be), not a placeholder');
   process.exit(1);
 }
 
